@@ -56,7 +56,7 @@ router.post(
     check('email', 'Введите email').normalizeEmail().isEmail(),
     check('password', 'Введите пароль').exists(),
   ],
-  async (requrest, response) => {
+  async (request, response) => {
     try {
       const errors = validationResult(request)
 
@@ -67,7 +67,7 @@ router.post(
         })
       }
 
-      const { email, password } = req.body
+      const { email, password } = request.body
       const user = await User.findOne({ email })
 
       if (!user) {
@@ -87,9 +87,9 @@ router.post(
       })
       response.json({ token, userId: user.id })
     } catch (error) {
-      response
-        .status(500)
-        .json({ message: 'Что-то пошло не так, попробуйте снова' })
+      response.status(500).json({
+        message: `Что-то пошло не так, попробуйте снова, ошибка: ${error}`,
+      })
     }
   }
 )
