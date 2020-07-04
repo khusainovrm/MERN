@@ -1,37 +1,34 @@
-const { Router } = require('express')
-const Link = require('../models/Link')
-const router = Router()
-const auth = require('../middleware/auth.midleware')
-const config = require('./config/default.json')
+const {Router} = require('express')
+const config = require('config')
 const shortid = require('shortid')
+const Link = require('../models/Link')
+const auth = require('../middleware/auth.middleware')
+const router = Router()
 
 router.post('/generate', auth, async (req, res) => {
   try {
-    const baseUrl = config.baseUrl
-    const { from } = req.body
+    const baseUrl = config.get('baseUrl')
+    const {from} = req.body
 
     const code = shortid.generate()
 
-    const exsisting = await Link.findOne({ from })
-    if (exsisting) {
-      return res.status(200).json({ link: exsisting })
+    const existing = await Link.findOne({ from })
+
+    if (existing) {
+      return res.json({ link: existing })
     }
 
     const to = baseUrl + '/t/' + code
 
     const link = new Link({
-      from,
-      to,
-      code,
-      owner: req.user.userId,
+      code, to, from, owner: req.user.userId
     })
 
     await link.save()
+
     res.status(201).json({ link })
-  } catch (error) {
-    response
-      .status(500)
-      .json({ message: 'Что-то пошло не так, попробуйте снова' })
+  } catch (e) {
+    res.status(500).json({ message: 'Что-то пошло не так, попробуйте снова' })
   }
 })
 
@@ -39,21 +36,17 @@ router.get('/', auth, async (req, res) => {
   try {
     const links = await Link.find({ owner: req.user.userId })
     res.json(links)
-  } catch (error) {
-    response
-      .status(500)
-      .json({ message: 'Что-то пошло не так, попробуйте снова' })
+  } catch (e) {
+    res.status(500).json({ message: 'Что-то пошло не так, попробуйте снова' })
   }
 })
 
-router.post('/:id', auth, async (req, res) => {
+router.get('/:id', auth, async (req, res) => {
   try {
-    const link = await Link.findByID(req.params.id)
+    const link = await Link.findById(req.params.id)
     res.json(link)
-  } catch (error) {
-    response
-      .status(500)
-      .json({ message: 'Что-то пошло не так, попробуйте снова' })
+  } catch (e) {
+    res.status(500).json({ message: 'Что-то пошло не так, попробуйте снова' })
   }
 })
 
