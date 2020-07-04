@@ -1,6 +1,6 @@
 const { modelName } = require('../models/User')
 const jwt = require('jsonwebtoken')
-const config = require('./config/default.json')
+const config = require('../config/default.json')
 
 module.exports = (req, res, next) => {
   if (req.method === 'OPTIONS') {
